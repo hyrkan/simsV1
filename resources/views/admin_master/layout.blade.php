@@ -14,18 +14,21 @@
 
   <!-- [Favicon] icon -->
   <link rel="icon" href="{{asset('admin/assets/images/favicon.svg')}}" type="image/x-icon"> <!-- [Google Font] Family -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" id="main-font-link">
-<!-- [Tabler Icons] https://tablericons.com -->
-<link rel="stylesheet" href="{{asset('admin/assets/fonts/tabler-icons.min.css')}}">	
-<!-- [Feather Icons] https://feathericons.com -->
-<link rel="stylesheet" href="{{asset('admin/assets/fonts/feather.css')}}">
-<!-- [Font Awesome Icons] https://fontawesome.com/icons -->
-<link rel="stylesheet" href="{{asset('admin/assets/fonts/fontawesome.css')}}">		
-<!-- [Material Icons] https://fonts.google.com/icons -->
-<link rel="stylesheet" href="{{asset('admin/assets/fonts/material.css')}}">
-<!-- [Template CSS Files] -->
-<link rel="stylesheet" href="{{asset('admin/assets/css/style.css')}}" id="main-style-link" >
-<link rel="stylesheet" href="{{asset('admin/assets/css/style-preset.css')}}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" id="main-font-link">
+  <!-- [Tabler Icons] https://tablericons.com -->
+  <link rel="stylesheet" href="{{asset('admin/assets/fonts/tabler-icons.min.css')}}">	
+  <!-- [Feather Icons] https://feathericons.com -->
+  <link rel="stylesheet" href="{{asset('admin/assets/fonts/feather.css')}}">
+  <!-- [Font Awesome Icons] https://fontawesome.com/icons -->
+  <link rel="stylesheet" href="{{asset('admin/assets/fonts/fontawesome.css')}}">		
+  <!-- [Material Icons] https://fonts.google.com/icons -->
+  <link rel="stylesheet" href="{{asset('admin/assets/fonts/material.css')}}">
+  <!-- [Template CSS Files] -->
+  <link rel="stylesheet" href="{{asset('admin/assets/css/style.css')}}" id="main-style-link" >
+  <link rel="stylesheet" href="{{asset('admin/assets/css/style-preset.css')}}">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+<!-- Vite CSS -->
+@vite(['resources/css/app.css'])
 
 </head>
 <!-- [Head] end -->
@@ -37,25 +40,6 @@
     <!-- [ Main Content ] start -->
     <div class="pc-container">
       <div class="pc-content">
-        <!-- [ breadcrumb ] start -->
-        <div class="page-header">
-          <div class="page-block">
-            <div class="row align-items-center">
-              <div class="col-md-12">
-                <div class="page-header-title">
-                  <h5 class="m-b-10">Sample Page</h5>
-                </div>
-                <ul class="breadcrumb">
-                  <li class="breadcrumb-item"><a href="../dashboard/index.html">Home</a></li>
-                  <li class="breadcrumb-item"><a href="javascript: void(0)">Other</a></li>
-                  <li class="breadcrumb-item" aria-current="page">Sample Page</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- [ breadcrumb ] end -->
-
         <div class="row">
           <div class="col-sm-12">
               @yield('content')
@@ -72,5 +56,11 @@
   <script src="{{asset('admin/assets/js/fonts/custom-font.js')}}"></script>
   <script src="{{asset('admin/assets/js/pcoded.js')}}"></script>
   <script src="{{asset('admin/assets/js/plugins/feather.min.js')}}"></script>
+  
+  <!-- Vite JS -->
+  @vite(['resources/js/app.js'])
+  
+  <!-- Page Specific Scripts -->
+  @yield('scripts')
   </body>
 </html>

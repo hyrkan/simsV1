@@ -22,3 +22,14 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# IDE / editor files
+.idea
+.vscode
+*.sublime-workspace
+*.sublime-project
+# Composer files
+/composer.lock
+
+# npm / yarn files
+/package-lock.json
+/yarn.lock
