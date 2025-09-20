@@ -7,12 +7,11 @@ use App\Http\Controllers\RolesAndPermissionController;
 
 
 Route::get('/auth/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/admin', function () {
-    return view('admin_master.layout'); 
-});
+    return view('admin_master.layout');
+})->name('admin.dashboard');
+
 
 Route::get('/', function () {
     return view('landing'); 
