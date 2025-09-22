@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AcademicTermController;
+use App\Http\Controllers\DepartmentController;
 use App\Models\AcademicTerm;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
@@ -41,4 +42,14 @@ Route::post('academic-terms/{academicTerm}/archive', function (AcademicTerm $aca
         'message' => 'Academic term archived successfully!',
         'data' => $academicTerm
     ]);
+});
+
+// Departments API Routes
+Route::prefix('departments')->group(function () {
+    Route::get('/', [DepartmentController::class, 'apiIndex']);
+    Route::post('/', [DepartmentController::class, 'apiStore']);
+    Route::put('/{department}', [DepartmentController::class, 'update']);
+    Route::get('/options', [DepartmentController::class, 'getOptions']);
+    Route::patch('/{department}/archive', [DepartmentController::class, 'archive']);
+    Route::patch('/{department}/restore', [DepartmentController::class, 'restore']);
 });

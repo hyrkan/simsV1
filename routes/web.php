@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RolesAndPermissionController;
 use App\Http\Controllers\AcademicTermController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\ProgramController;
 
 Route::get('/auth/login', [AuthController::class, 'showLoginForm'])->name('login');
 
@@ -25,18 +27,8 @@ Route::get('/admin/roles', [RolesAndPermissionController::class, 'index'])->name
 
 Route::resource('/admin/academic-terms', AcademicTermController::class)->middleware('auth');
 Route::get('/admin/academic-terms-archive', [AcademicTermController::class, 'archiveTerms'])->name('admin.academic-terms.archive')->middleware('auth');
-
-
-
-// Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function(){
-//     Route::get('/create-staff', [AdminController::class, 'create'])->name('create-staff');
-// });
-
-
-
-
-
-
+Route::resource('/admin/departments', DepartmentController::class)->middleware('auth');
+Route::resource('/admin/programs', ProgramController::class)->middleware('auth');
 
 // API Routes for Roles and Permissions
 Route::prefix('admin/api')->group(function() {
