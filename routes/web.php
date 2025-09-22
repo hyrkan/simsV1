@@ -4,23 +4,39 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RolesAndPermissionController;
-
+use App\Http\Controllers\AcademicTermController;
 
 Route::get('/auth/login', [AuthController::class, 'showLoginForm'])->name('login');
+
+Route::get('/', function () {
+    return view('landing'); 
+});
 
 Route::get('/admin', function () {
     return view('admin_master.layout');
 })->name('admin.dashboard');
 
-
-Route::get('/', function () {
-    return view('landing'); 
-});
+//staff
 Route::get('/create-staff', [AdminController::class, 'create'])->name('create-staff');
 Route::post('/create-staff', [AdminController::class, 'store'])->name('create-staff.store');
 Route::get('/staff-list', [AdminController::class, 'index'])->name('staff-list');
 Route::get('/admin/staff', [AdminController::class, 'index'])->name('admin.staff');
 Route::get('/admin/roles', [RolesAndPermissionController::class, 'index'])->name('admin.roles');
+
+Route::resource('/admin/academic-terms', AcademicTermController::class)->middleware('auth');
+Route::get('/admin/academic-terms-archive', [AcademicTermController::class, 'archiveTerms'])->name('admin.academic-terms.archive')->middleware('auth');
+
+
+
+// Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function(){
+//     Route::get('/create-staff', [AdminController::class, 'create'])->name('create-staff');
+// });
+
+
+
+
+
+
 
 // API Routes for Roles and Permissions
 Route::prefix('admin/api')->group(function() {
@@ -37,9 +53,7 @@ Route::prefix('admin/api')->group(function() {
     Route::delete('/permissions/{id}', [RolesAndPermissionController::class, 'deletePermission']);
 });
 
-// Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function(){
-//     Route::get('/create-staff', [AdminController::class, 'create'])->name('create-staff');
-// });
+
 
 
 require __DIR__.'/auth.php';

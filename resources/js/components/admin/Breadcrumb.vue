@@ -9,7 +9,7 @@
           <ul class="breadcrumb">
             <!-- Home link -->
             <li class="breadcrumb-item">
-              <a href="/admin/dashboard">Home</a>
+              <a href="/admin">Home</a>
             </li>
             
             <!-- Dynamic breadcrumb items -->
