@@ -25,11 +25,23 @@
               <span class="pc-mtext">Academic Term</span>
             </a>
           </li>
-          <li class="pc-item">
-            <a href="../elements/bc_color.html" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-color-swatch"></i></span>
-              <span class="pc-mtext">Color</span>
+          <li class="pc-item pc-hasmenu">
+            <a href="#!" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-school"></i></span>
+              <span class="pc-mtext">Academic Management</span>
+              <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
             </a>
+            <ul class="pc-submenu">
+              <li class="pc-item">
+                <a class="pc-link" href="{{route('departments.index')}}">Departments</a>
+              </li>
+              <li class="pc-item">
+                <a class="pc-link" href="{{route('programs.index')}}">Programs</a>
+              </li>
+              <li class="pc-item">
+                <a class="pc-link" href="#">Curriculum</a>
+              </li>
+            </ul>
           </li>
           <li class="pc-item">
             <a href="../elements/icon-tabler.html" class="pc-link">
