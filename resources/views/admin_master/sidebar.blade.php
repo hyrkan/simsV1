@@ -16,13 +16,13 @@
           </li>
   
           <li class="pc-item pc-caption">
-            <label>UI Components</label>
+            <label>Academics</label>
             <i class="ti ti-dashboard"></i>
           </li>
           <li class="pc-item">
-            <a href="../elements/bc_typography.html" class="pc-link">
+            <a href="{{route('academic-terms.index')}}" class="pc-link">
               <span class="pc-micon"><i class="ti ti-typography"></i></span>
-              <span class="pc-mtext">Typography</span>
+              <span class="pc-mtext">Academic Term</span>
             </a>
           </li>
           <li class="pc-item">
