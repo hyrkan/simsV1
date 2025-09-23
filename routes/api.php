@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AcademicTermController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\ProgramController;
 use App\Models\AcademicTerm;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
@@ -52,4 +53,16 @@ Route::prefix('departments')->group(function () {
     Route::get('/options', [DepartmentController::class, 'getOptions']);
     Route::patch('/{department}/archive', [DepartmentController::class, 'archive']);
     Route::patch('/{department}/restore', [DepartmentController::class, 'restore']);
+});
+
+// Programs API Routes
+Route::prefix('programs')->group(function () {
+    Route::get('/', [ProgramController::class, 'getData']);
+    Route::post('/', [ProgramController::class, 'store']);
+    Route::get('/{program}', [ProgramController::class, 'show']);
+    Route::put('/{program}', [ProgramController::class, 'update']);
+    Route::delete('/{program}', [ProgramController::class, 'destroy']);
+    Route::get('/departments/options', [ProgramController::class, 'getDepartments']);
+    Route::patch('/{program}/archive', [ProgramController::class, 'archive']);
+    Route::patch('/{program}/restore', [ProgramController::class, 'restore']);
 });
