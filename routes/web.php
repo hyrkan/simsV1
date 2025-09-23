@@ -7,7 +7,7 @@ use App\Http\Controllers\RolesAndPermissionController;
 use App\Http\Controllers\AcademicTermController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ProgramController;
-
+use App\Http\Controllers\CurriculumController;
 Route::get('/auth/login', [AuthController::class, 'showLoginForm'])->name('login');
 
 Route::get('/', function () {
@@ -32,6 +32,9 @@ Route::resource('/admin/programs', ProgramController::class)->middleware('auth')
 Route::get('/admin/programs-archive', [ProgramController::class, 'archivePrograms'])->name('admin.programs.archive')->middleware('auth');
 Route::get('/admin/programs-restore', [ProgramController::class, 'restorePrograms'])->name('admin.programs.restore')->middleware('auth');
 Route::get('/admin/program/{program}', [ProgramController::class, 'showProgram'])->name('admin.program.show')->middleware('auth');
+
+Route::resource('/admin/curricula', CurriculumController::class)->middleware('auth');
+
 // API Routes for Roles and Permissions
 Route::prefix('admin/api')->group(function() {
     // Roles API

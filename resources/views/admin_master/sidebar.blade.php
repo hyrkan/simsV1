@@ -39,7 +39,7 @@
                 <a class="pc-link" href="{{route('programs.index')}}">Programs</a>
               </li>
               <li class="pc-item">
-                <a class="pc-link" href="#">Curriculum</a>
+                <a class="pc-link" href="{{route('curricula.index')}}">Curriculum</a>
               </li>
             </ul>
           </li>

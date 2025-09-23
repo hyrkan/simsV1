@@ -98,47 +98,51 @@
                 <div class="col-md-6">
                   <h5>Basic Information</h5>
                   <table class="table table-borderless">
-                    <tr>
-                      <td><strong>Program Code:</strong></td>
-                      <td>{{ program.code }}</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Program Name:</strong></td>
-                      <td>{{ program.name }}</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Department:</strong></td>
-                      <td>{{ program.department?.name || 'N/A' }}</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Degree Level:</strong></td>
-                      <td>{{ program.degree_level }}</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Duration:</strong></td>
-                      <td>{{ program.duration }} years</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Status:</strong></td>
-                      <td><span class="badge" :class="getStatusClass(program.status)">{{ program.status }}</span></td>
-                    </tr>
+                    <tbody>
+                      <tr>
+                        <td><strong>Program Code:</strong></td>
+                        <td>{{ program.code }}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Program Name:</strong></td>
+                        <td>{{ program.name }}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Department:</strong></td>
+                        <td>{{ program.department?.name || 'N/A' }}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Degree Level:</strong></td>
+                        <td>{{ program.degree_level }}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Duration:</strong></td>
+                        <td>{{ program.duration }} years</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Status:</strong></td>
+                        <td><span class="badge" :class="getStatusClass(program.status)">{{ program.status }}</span></td>
+                      </tr>
+                    </tbody>
                   </table>
                 </div>
                 <div class="col-md-6">
                   <h5>Additional Details</h5>
                   <table class="table table-borderless">
-                    <tr>
-                      <td><strong>Created:</strong></td>
-                      <td>{{ formatDate(program.created_at) }}</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Last Updated:</strong></td>
-                      <td>{{ formatDate(program.updated_at) }}</td>
-                    </tr>
-                    <tr v-if="program.description">
-                      <td><strong>Description:</strong></td>
-                      <td>{{ program.description }}</td>
-                    </tr>
+                    <tbody>
+                      <tr>
+                        <td><strong>Created:</strong></td>
+                        <td>{{ formatDate(program.created_at) }}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Last Updated:</strong></td>
+                        <td>{{ formatDate(program.updated_at) }}</td>
+                      </tr>
+                      <tr v-if="program.description">
+                        <td><strong>Description:</strong></td>
+                        <td>{{ program.description }}</td>
+                      </tr>
+                    </tbody>
                   </table>
                 </div>
               </div>
