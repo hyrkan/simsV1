@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AcademicTermController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\CurriculumController;
 use App\Models\AcademicTerm;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
@@ -65,4 +66,14 @@ Route::prefix('programs')->group(function () {
     Route::get('/departments/options', [ProgramController::class, 'getDepartments']);
     Route::patch('/{program}/archive', [ProgramController::class, 'archive']);
     Route::patch('/{program}/restore', [ProgramController::class, 'restore']);
+});
+
+// Curricula API Routes
+Route::prefix('curricula')->group(function () {
+    Route::get('/', [CurriculumController::class, 'index']);
+    Route::post('/', [CurriculumController::class, 'store']);
+    Route::get('/{curriculum}', [CurriculumController::class, 'show']);
+    Route::put('/{curriculum}', [CurriculumController::class, 'update']);
+    Route::delete('/{curriculum}', [CurriculumController::class, 'destroy']);
+    Route::patch('/{curriculum}', [CurriculumController::class, 'archive']);
 });
