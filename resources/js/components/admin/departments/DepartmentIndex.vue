@@ -584,10 +584,23 @@ onMounted(() => {
 .page-link {
   border: none;
   color: #6c757d;
+  background-color: transparent;
+}
+
+.page-link:hover {
+  color: #495057;
+  background-color: #e9ecef;
+  border-color: #dee2e6;
 }
 
 .page-item.active .page-link {
-  background-color: #0d6efd;
-  border-color: #0d6efd;
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: #fff;
+}
+
+.page-item.disabled .page-link {
+  color: #adb5bd;
+  background-color: transparent;
 }
 </style>

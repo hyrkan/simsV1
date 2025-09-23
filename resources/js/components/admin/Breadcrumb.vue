@@ -4,7 +4,7 @@
       <div class="row align-items-center">
         <div class="col-md-12">
           <div class="page-header-title">
-            <h5 class="m-b-10 px-2">{{ pageTitle }}</h5>
+            <h5 class="m-b-10">{{ pageTitle }}</h5>
           </div>
           <ul class="breadcrumb">
             <!-- Home link -->
@@ -52,44 +52,5 @@ export default {
 </script>
 
 <style scoped>
-.page-header {
-  background: #fff;
-  padding: 20px 0;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.page-header-title h5 {
-  color: #495057;
-  font-weight: 600;
-}
-
-.breadcrumb {
-  background: transparent;
-  padding: 0;
-  margin: 0;
-}
-
-.breadcrumb-item {
-  font-size: 14px;
-}
-
-.breadcrumb-item a {
-  color: #007bff;
-  text-decoration: none;
-}
-
-.breadcrumb-item a:hover {
-  color: #0056b3;
-  text-decoration: underline;
-}
-
-.breadcrumb-item.active {
-  color: #6c757d;
-}
-
-.breadcrumb-item + .breadcrumb-item::before {
-  content: ">";
-  color: #6c757d;
-  padding: 0 8px;
-}
+/* Let the admin template handle breadcrumb styling */
 </style>
