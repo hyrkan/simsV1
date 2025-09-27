@@ -25,4 +25,12 @@ class Program extends Model
     {
         return $this->hasMany(Curriculum::class);
     }
+
+    /**
+     * Get the majors for the program.
+     */
+    public function majors(): HasMany
+    {
+        return $this->hasMany(Major::class);
+    }
 }

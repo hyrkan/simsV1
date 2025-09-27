@@ -474,16 +474,8 @@ const submitForm = async () => {
     
     await axios[method](url, form)
     
-    const modal = bootstrap.Modal.getInstance(document.getElementById(modalId))
-    modal.hide()
-    
-    showAlert(
-      isEditMode.value ? 'Program updated successfully!' : 'Program created successfully!',
-      'success'
-    )
-    
-    fetchPrograms(pagination.current_page)
-    resetForm()
+    // Refresh the page to ensure clean state and avoid modal issues
+    window.location.reload()
   } catch (error) {
     console.error('Error saving program:', error)
     showAlert(
@@ -508,12 +500,8 @@ const confirmArchive = async () => {
   try {
     await axios.patch(`/api/programs/${programToArchive.value.id}/archive`)
     
-    const modal = bootstrap.Modal.getInstance(document.getElementById('archiveModal'))
-    modal.hide()
-    
-    showAlert('Program archived successfully!', 'success')
-    fetchPrograms(pagination.current_page)
-    programToArchive.value = null
+    // Refresh the page to ensure clean state and avoid modal issues
+    window.location.reload()
   } catch (error) {
     console.error('Error archiving program:', error)
     showAlert('Error archiving program', 'danger')
