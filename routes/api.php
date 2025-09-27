@@ -6,6 +6,7 @@ use App\Http\Controllers\AcademicTermController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\CurriculumController;
+use App\Http\Controllers\SubjectController;
 use App\Models\AcademicTerm;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
@@ -66,6 +67,9 @@ Route::prefix('programs')->group(function () {
     Route::get('/departments/options', [ProgramController::class, 'getDepartments']);
     Route::patch('/{program}/archive', [ProgramController::class, 'archive']);
     Route::patch('/{program}/restore', [ProgramController::class, 'restore']);
+    
+    // Program-Curriculum relationship routes
+    Route::get('/{program}/curricula', [ProgramController::class, 'getCurricula']);
 });
 
 // Curricula API Routes
@@ -76,4 +80,20 @@ Route::prefix('curricula')->group(function () {
     Route::put('/{curriculum}', [CurriculumController::class, 'update']);
     Route::delete('/{curriculum}', [CurriculumController::class, 'destroy']);
     Route::patch('/{curriculum}', [CurriculumController::class, 'archive']);
+    
+    // Curriculum-Subject relationship routes
+    Route::get('/{curriculum}/subjects', [CurriculumController::class, 'getSubjects']);
+    Route::post('/{curriculum}/subjects', [CurriculumController::class, 'attachSubject']);
+    Route::put('/{curriculum}/subjects/{subject}', [CurriculumController::class, 'updateSubject']);
+    Route::delete('/{curriculum}/subjects/{subject}', [CurriculumController::class, 'detachSubject']);
+});
+
+// Subjects API Routes
+Route::prefix('subjects')->group(function () {
+    Route::get('/', [SubjectController::class, 'index']);
+    Route::post('/', [SubjectController::class, 'store']);
+    Route::get('/{subject}', [SubjectController::class, 'show']);
+    Route::put('/{subject}', [SubjectController::class, 'update']);
+    Route::delete('/{subject}', [SubjectController::class, 'destroy']);
+    Route::patch('/{subject}/archive', [SubjectController::class, 'archive']);
 });

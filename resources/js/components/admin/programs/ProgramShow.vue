@@ -163,20 +163,20 @@
                     <thead>
                       <tr>
                         <th>Name</th>
-                        <th>Version</th>
-                        <th>Effective Date</th>
+                        <th>Effective Year</th>
                         <th>Status</th>
+                        <th>Created</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="curriculum in curriculums" :key="curriculum.id">
                         <td>{{ curriculum.name }}</td>
-                        <td>{{ curriculum.version }}</td>
-                        <td>{{ formatDate(curriculum.effective_date) }}</td>
+                        <td>{{ curriculum.effective_year }}</td>
                         <td>
                           <span class="badge" :class="getStatusClass(curriculum.status)">{{ curriculum.status }}</span>
                         </td>
+                        <td>{{ formatDate(curriculum.created_at) }}</td>
                         <td>
                           <button class="btn btn-outline-primary btn-sm me-1" @click="viewCurriculum(curriculum.id)">
                             <i class="fas fa-eye"></i> View
@@ -298,7 +298,7 @@ const fetchProgram = async () => {
 // Fetch curriculums for this program
 const fetchCurriculums = async () => {
   try {
-    const response = await axios.get(`/api/programs/${programId}/curriculums`)
+    const response = await axios.get(`/api/programs/${programId}/curricula`)
     curriculums.value = response.data.data || []
   } catch (error) {
     console.error('Error fetching curriculums:', error)

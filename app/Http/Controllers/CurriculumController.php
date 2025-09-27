@@ -127,4 +127,128 @@ class CurriculumController extends Controller
             'curriculum' => $curriculum
         ]);
     }
+
+    /**
+     * Get subjects for a specific curriculum
+     */
+    public function getSubjects(Request $request, Curriculum $curriculum)
+    {
+        $subjects = $curriculum->subjects()
+            ->with('department')
+            ->orderBy('year_level')
+            ->orderBy('semester')
+            ->orderBy('order')
+            ->get();
+
+        return response()->json($subjects);
+    }
+
+    /**
+     * Attach a subject to a curriculum
+     */
+    public function attachSubject(Request $request, Curriculum $curriculum)
+    {
+        $validated = $request->validate([
+            'subject_id' => 'required|exists:subjects,id',
+            'year_level' => 'required|integer|min:1|max:6',
+            'semester' => 'required|integer|min:1|max:3',
+            'order' => 'nullable|integer|min:1',
+            'is_required' => 'boolean',
+            'units_override' => 'nullable|integer|min:1|max:6'
+        ]);
+
+        // Check if subject is already attached to this curriculum
+        if ($curriculum->subjects()->where('subject_id', $validated['subject_id'])->exists()) {
+            return response()->json([
+                'message' => 'Subject is already attached to this curriculum.',
+                'error' => 'Duplicate attachment'
+            ], 422);
+        }
+
+        // Set default values
+        $validated['is_required'] = $validated['is_required'] ?? true;
+        
+        // If no order is specified, set it to the next available order for the year/semester
+        if (!isset($validated['order'])) {
+            $maxOrder = $curriculum->subjects()
+                ->where('year_level', $validated['year_level'])
+                ->where('semester', $validated['semester'])
+                ->max('order');
+            $validated['order'] = ($maxOrder ?? 0) + 1;
+        }
+
+        $curriculum->subjects()->attach($validated['subject_id'], [
+            'year_level' => $validated['year_level'],
+            'semester' => $validated['semester'],
+            'order' => $validated['order'],
+            'is_required' => $validated['is_required'],
+            'units_override' => $validated['units_override']
+        ]);
+
+        // Return the attached subject with pivot data
+        $subject = $curriculum->subjects()
+            ->with('department')
+            ->where('subject_id', $validated['subject_id'])
+            ->first();
+
+        return response()->json([
+            'message' => 'Subject attached to curriculum successfully',
+            'subject' => $subject
+        ], 201);
+    }
+
+    /**
+     * Update curriculum-subject relationship
+     */
+    public function updateSubject(Request $request, Curriculum $curriculum, $subjectId)
+    {
+        $validated = $request->validate([
+            'year_level' => 'required|integer|min:1|max:6',
+            'semester' => 'required|integer|min:1|max:3',
+            'order' => 'nullable|integer|min:1',
+            'is_required' => 'boolean',
+            'units_override' => 'nullable|integer|min:1|max:6'
+        ]);
+
+        // Check if subject is attached to this curriculum
+        if (!$curriculum->subjects()->where('subject_id', $subjectId)->exists()) {
+            return response()->json([
+                'message' => 'Subject is not attached to this curriculum.',
+                'error' => 'Subject not found'
+            ], 404);
+        }
+
+        $curriculum->subjects()->updateExistingPivot($subjectId, $validated);
+
+        // Return the updated subject with pivot data
+        $subject = $curriculum->subjects()
+            ->with('department')
+            ->where('subject_id', $subjectId)
+            ->first();
+
+        return response()->json([
+            'message' => 'Curriculum-subject relationship updated successfully',
+            'subject' => $subject
+        ]);
+    }
+
+    /**
+     * Detach a subject from a curriculum
+     */
+    public function detachSubject(Request $request, Curriculum $curriculum, $subjectId)
+    {
+        // Check if subject is attached to this curriculum
+        if (!$curriculum->subjects()->where('subject_id', $subjectId)->exists()) {
+            return response()->json([
+                'message' => 'Subject is not attached to this curriculum.',
+                'error' => 'Subject not found'
+            ], 404);
+        }
+
+        $curriculum->subjects()->detach($subjectId);
+
+        return response()->json([
+            'message' => 'Subject detached from curriculum successfully'
+        ]);
+    }
 }

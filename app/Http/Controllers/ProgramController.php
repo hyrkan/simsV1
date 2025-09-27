@@ -203,4 +203,20 @@ class ProgramController extends Controller
             'message' => 'Program deleted successfully!'
         ]);
     }
+
+    /**
+     * Get curricula for a specific program
+     */
+    public function getCurricula(Request $request, Program $program): JsonResponse
+    {
+        $curricula = $program->curricula()
+            ->orderBy('effective_year', 'desc')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $curricula
+        ]);
+    }
 }
