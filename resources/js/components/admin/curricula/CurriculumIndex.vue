@@ -192,7 +192,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="program_id" class="form-label">Program</label>
-                                    <select class="form-select" id="program_id" v-model="form.program_id" required>
+                                    <select class="form-select" id="program_id" v-model="form.program_id" @change="onProgramChange" required>
                                         <option value="">Select a Program</option>
                                         <template v-for="program in programs" :key="program?.id">
                                             <option v-if="program" :value="program.id">
@@ -201,6 +201,7 @@
                                         </template>
                                     </select>
                                 </div>
+
                                 <div class="mb-3">
                                     <label for="effective_year" class="form-label">Effective Year</label>
                                     <input type="number" class="form-control" id="effective_year" v-model="form.effective_year" min="2000" max="2030" required>
@@ -242,7 +243,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="edit_program_id" class="form-label">Program</label>
-                                    <select class="form-select" id="edit_program_id" v-model="editForm.program_id" required>
+                                    <select class="form-select" id="edit_program_id" v-model="editForm.program_id" @change="onEditProgramChange" required>
                                         <option value="">Select a Program</option>
                                         <template v-for="program in programs" :key="program?.id">
                                             <option v-if="program" :value="program.id">
@@ -251,6 +252,7 @@
                                         </template>
                                     </select>
                                 </div>
+
                                 <div class="mb-3">
                                     <label for="edit_effective_year" class="form-label">Effective Year</label>
                                     <input type="number" class="form-control" id="edit_effective_year" v-model="editForm.effective_year" min="2000" max="2030" required>
@@ -418,6 +420,16 @@ const fetchPrograms = async () => {
         alert('Error fetching programs. Please try again.')
         programs.value = [] // Ensure programs is always an array
     }
+}
+
+
+
+const onProgramChange = () => {
+    // Program change handler - no longer needed for major selection
+}
+
+const onEditProgramChange = () => {
+    // Program change handler - no longer needed for major selection
 }
 
 const submitForm = async () => {

@@ -46,29 +46,25 @@ class SubjectController extends Controller
             'lecture_hours' => 'nullable|integer|min:0|max:10',
             'lab_hours' => 'nullable|integer|min:0|max:10',
             'type' => ['required', Rule::in(['Core', 'Major', 'Minor', 'Elective', 'General Education'])],
-            'department_id' => 'required|exists:departments,id',
             'status' => ['nullable', Rule::in(['Active', 'Inactive', 'Archived'])]
         ]);
 
         // Set default status if not provided
         $validated['status'] = $validated['status'] ?? 'Active';
 
-        // Check for duplicate subject code within the same department
-        $existingSubject = Subject::where('code', $validated['code'])
-            ->where('department_id', $validated['department_id'])
-            ->first();
+        // Check for duplicate subject code
+        $existingSubject = Subject::where('code', $validated['code'])->first();
 
         if ($existingSubject) {
             return response()->json([
-                'message' => 'A subject with this code already exists in the selected department.',
+                'message' => 'A subject with this code already exists.',
                 'errors' => [
-                    'code' => ['Subject code must be unique within the department.']
+                    'code' => ['Subject code must be unique.']
                 ]
             ], 422);
         }
 
         $subject = Subject::create($validated);
-        $subject->load('department');
 
         return response()->json([
             'message' => 'Subject created successfully',
@@ -113,27 +109,24 @@ class SubjectController extends Controller
             'lecture_hours' => 'nullable|integer|min:0|max:10',
             'lab_hours' => 'nullable|integer|min:0|max:10',
             'type' => ['required', Rule::in(['Core', 'Major', 'Minor', 'Elective', 'General Education'])],
-            'department_id' => 'required|exists:departments,id',
             'status' => ['nullable', Rule::in(['Active', 'Inactive', 'Archived'])]
         ]);
 
-        // Check for duplicate subject code within the same department (excluding current subject)
+        // Check for duplicate subject code (excluding current subject)
         $existingSubject = Subject::where('code', $validated['code'])
-            ->where('department_id', $validated['department_id'])
             ->where('id', '!=', $subject->id)
             ->first();
 
         if ($existingSubject) {
             return response()->json([
-                'message' => 'A subject with this code already exists in the selected department.',
+                'message' => 'A subject with this code already exists.',
                 'errors' => [
-                    'code' => ['Subject code must be unique within the department.']
+                    'code' => ['Subject code must be unique.']
                 ]
             ], 422);
         }
 
         $subject->update($validated);
-        $subject->load('department');
 
         return response()->json([
             'message' => 'Subject updated successfully',
