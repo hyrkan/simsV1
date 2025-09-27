@@ -219,4 +219,20 @@ class ProgramController extends Controller
             'data' => $curricula
         ]);
     }
+
+    /**
+     * Get majors for a specific program
+     */
+    public function getMajors(Request $request, Program $program): JsonResponse
+    {
+        $majors = $program->majors()
+            ->orderBy('name')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $majors
+        ]);
+    }
 }

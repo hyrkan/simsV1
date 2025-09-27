@@ -7,6 +7,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\MajorController;
 use App\Models\AcademicTerm;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
@@ -70,6 +71,10 @@ Route::prefix('programs')->group(function () {
     
     // Program-Curriculum relationship routes
     Route::get('/{program}/curricula', [ProgramController::class, 'getCurricula']);
+    
+    // Program-Major relationship routes
+    Route::get('/{program}/majors', [ProgramController::class, 'getMajors']);
+    Route::post('/{program}/majors', [MajorController::class, 'store']);
 });
 
 // Curricula API Routes
@@ -96,4 +101,9 @@ Route::prefix('subjects')->group(function () {
     Route::put('/{subject}', [SubjectController::class, 'update']);
     Route::delete('/{subject}', [SubjectController::class, 'destroy']);
     Route::patch('/{subject}/archive', [SubjectController::class, 'archive']);
+});
+
+// Majors API Routes
+Route::prefix('majors')->group(function () {
+    Route::delete('/{major}', [MajorController::class, 'destroy']);
 });
