@@ -61,7 +61,7 @@ class CurriculumController extends Controller
     {
         // If it's an API request, return JSON
         if ($request->expectsJson() || $request->is('api/*')) {
-            $curriculum->load('program');
+            $curriculum->load(['program.department']);
             return response()->json($curriculum);
         }
         
@@ -134,11 +134,16 @@ class CurriculumController extends Controller
     public function getSubjects(Request $request, Curriculum $curriculum)
     {
         $subjects = $curriculum->subjects()
-            ->with('department')
-            ->orderBy('year_level')
-            ->orderBy('semester')
-            ->orderBy('order')
-            ->get();
+            ->with(['department'])
+            ->withPivot(['major_id'])
+            ->get()
+            ->map(function ($subject) {
+                // Load major information if major_id exists in pivot
+                if ($subject->pivot->major_id) {
+                    $subject->major = \App\Models\Major::find($subject->pivot->major_id);
+                }
+                return $subject;
+            });
 
         return response()->json($subjects);
     }
@@ -150,6 +155,7 @@ class CurriculumController extends Controller
     {
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
+            'major_id' => 'nullable|exists:majors,id',
             'year_level' => 'required|integer|min:1|max:6',
             'semester' => 'required|integer|min:1|max:3',
             'order' => 'nullable|integer|min:1',
@@ -157,10 +163,16 @@ class CurriculumController extends Controller
             'units_override' => 'nullable|integer|min:1|max:6'
         ]);
 
-        // Check if subject is already attached to this curriculum
-        if ($curriculum->subjects()->where('subject_id', $validated['subject_id'])->exists()) {
+        // Check if subject is already attached to this curriculum with the same major
+        $existingAttachment = $curriculum->subjects()
+            ->where('subject_id', $validated['subject_id'])
+            ->wherePivot('major_id', $validated['major_id'])
+            ->exists();
+            
+        if ($existingAttachment) {
+            $majorText = $validated['major_id'] ? 'for this major' : 'as a general subject';
             return response()->json([
-                'message' => 'Subject is already attached to this curriculum.',
+                'message' => "Subject is already attached to this curriculum {$majorText}.",
                 'error' => 'Duplicate attachment'
             ], 422);
         }
@@ -178,6 +190,7 @@ class CurriculumController extends Controller
         }
 
         $curriculum->subjects()->attach($validated['subject_id'], [
+            'major_id' => $validated['major_id'],
             'year_level' => $validated['year_level'],
             'semester' => $validated['semester'],
             'order' => $validated['order'],

@@ -23,8 +23,9 @@ class Curriculum extends Model
      */
     public function subjects(): BelongsToMany
     {
-        return $this->belongsToMany(Subject::class, 'curriculum_subject')
+        return $this->belongsToMany(Subject::class, 'curriculum_subjects')
             ->withPivot([
+                'major_id',
                 'year_level',
                 'semester', 
                 'order',

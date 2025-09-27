@@ -108,6 +108,28 @@
                                                 <td><strong>Department:</strong></td>
                                                 <td>{{ curriculum.program?.department?.name || 'N/A' }}</td>
                                             </tr>
+                                            <tr>
+                                                <td><strong>Curriculum Type:</strong></td>
+                                                <td>
+                                                    <span class="badge" :class="hasMajorSpecificSubjects ? 'bg-info' : 'bg-secondary'">
+                                                        {{ curriculumType }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr v-if="majorsInCurriculum.length > 0">
+                                                <td><strong>Majors:</strong></td>
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        <span 
+                                                            v-for="major in majorsInCurriculum" 
+                                                            :key="major.id"
+                                                            class="badge bg-primary"
+                                                        >
+                                                            {{ major.name }}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -150,71 +172,138 @@
                                 </button>
                             </div>
                             
-                            <div v-for="year in yearLevels" :key="year" class="mb-4">
-                                <h6 class="text-primary border-bottom pb-2">Year {{ year }}</h6>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h6 class="text-muted">1st Semester</h6>
-                                        <div class="subject-list">
-                                            <div 
-                                                v-for="subject in getSubjectsByYearSemester(year, 1)" 
-                                                :key="subject.id"
-                                                class="subject-item p-2 mb-2 border rounded"
-                                            >
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        <strong>{{ subject.code }}</strong> - {{ subject.title }}
-                                                        <br>
-                                                        <small class="text-muted">{{ subject.units }} units</small>
-                                                        <span v-if="subject.pivot?.is_required" class="badge bg-success ms-2">Required</span>
-                                                        <span v-else class="badge bg-secondary ms-2">Elective</span>
-                                                    </div>
-                                                    <div class="btn-group btn-group-sm">
-                                                        <button @click="editSubject(subject)" class="btn btn-outline-primary btn-sm">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button @click="removeSubject(subject)" class="btn btn-outline-danger btn-sm">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div v-if="getSubjectsByYearSemester(year, 1).length === 0" class="text-muted text-center p-3">
-                                                No subjects for this semester
-                                            </div>
-                                        </div>
+                            <!-- Curriculum Structure Tables -->
+                            <div v-for="year in yearLevels" :key="year" class="mb-5">
+                                <h4 class="text-uppercase fw-bold mb-3">{{ getYearName(year) }}</h4>
+                                
+                                <!-- First Semester -->
+                                <div v-if="getSubjectsByYearSemester(year, 1).length > 0" class="mb-4">
+                                    <h5 class="text-decoration-underline mb-3">First Semester</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width: 15%;">Course No.</th>
+                                                    <th style="width: 45%;">Course Title</th>
+                                                    <th style="width: 10%;" class="text-center">Lec Hrs</th>
+                                                    <th style="width: 10%;" class="text-center">Lab Hrs</th>
+                                                    <th style="width: 10%;" class="text-center">Total</th>
+                                                    <th style="width: 10%;" class="text-center">Units</th>
+                                                    <th style="width: 15%;" class="text-center">Pre-Requisites</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="subject in getSubjectsByYearSemester(year, 1)" :key="subject.id">
+                                                    <td><strong>{{ subject.code }}</strong></td>
+                                                    <td>
+                                                        {{ subject.title }}
+                                                        <div class="mt-1">
+                                                            <span class="badge me-1" :class="getSubjectTypeBadgeClass(subject.type)">
+                                                                {{ subject.type }}
+                                                            </span>
+                                                            <span v-if="subject.major" class="badge bg-info">
+                                                                {{ subject.major.name }}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">{{ subject.lecture_hours || 0 }}</td>
+                                                    <td class="text-center">{{ subject.lab_hours || 0 }}</td>
+                                                    <td class="text-center">{{ (parseInt(subject.lecture_hours) || 0) + (parseInt(subject.lab_hours) || 0) }}</td>
+                                                    <td class="text-center"><strong>{{ subject.pivot?.units_override || subject.units }}</strong></td>
+                                                    <td class="text-center">{{ subject.prerequisites || '' }}</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot class="table-secondary">
+                                                <tr>
+                                                    <td colspan="2" class="text-center"><strong>TOTAL</strong></td>
+                                                    <td class="text-center"><strong>{{ getSemesterTotals(year, 1).lecture_hours }}</strong></td>
+                                                    <td class="text-center"><strong>{{ getSemesterTotals(year, 1).lab_hours }}</strong></td>
+                                                    <td class="text-center"><strong>{{ getSemesterTotals(year, 1).total_hours }}</strong></td>
+                                                    <td class="text-center"><strong>{{ getSemesterTotals(year, 1).units }}</strong></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
                                     </div>
-                                    <div class="col-md-6">
-                                        <h6 class="text-muted">2nd Semester</h6>
-                                        <div class="subject-list">
-                                            <div 
-                                                v-for="subject in getSubjectsByYearSemester(year, 2)" 
-                                                :key="subject.id"
-                                                class="subject-item p-2 mb-2 border rounded"
-                                            >
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        <strong>{{ subject.code }}</strong> - {{ subject.title }}
-                                                        <br>
-                                                        <small class="text-muted">{{ subject.units }} units</small>
-                                                        <span v-if="subject.pivot?.is_required" class="badge bg-success ms-2">Required</span>
-                                                        <span v-else class="badge bg-secondary ms-2">Elective</span>
-                                                    </div>
-                                                    <div class="btn-group btn-group-sm">
-                                                        <button @click="editSubject(subject)" class="btn btn-outline-primary btn-sm">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button @click="removeSubject(subject)" class="btn btn-outline-danger btn-sm">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div v-if="getSubjectsByYearSemester(year, 2).length === 0" class="text-muted text-center p-3">
-                                                No subjects for this semester
-                                            </div>
-                                        </div>
+                                </div>
+                                
+                                <!-- Second Semester -->
+                                <div v-if="getSubjectsByYearSemester(year, 2).length > 0" class="mb-4">
+                                    <h5 class="text-decoration-underline mb-3">Second Semester</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width: 15%;">Course No.</th>
+                                                    <th style="width: 45%;">Course Title</th>
+                                                    <th style="width: 10%;" class="text-center">Lec Hrs</th>
+                                                    <th style="width: 10%;" class="text-center">Lab Hrs</th>
+                                                    <th style="width: 10%;" class="text-center">Total</th>
+                                                    <th style="width: 10%;" class="text-center">Units</th>
+                                                    <th style="width: 15%;" class="text-center">Pre-Requisites</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="subject in getSubjectsByYearSemester(year, 2)" :key="subject.id">
+                                                    <td><strong>{{ subject.code }}</strong></td>
+                                                    <td>
+                                                        {{ subject.title }}
+                                                        <div class="mt-1">
+                                                            <span class="badge me-1" :class="getSubjectTypeBadgeClass(subject.type)">
+                                                                {{ subject.type }}
+                                                            </span>
+                                                            <span v-if="subject.major" class="badge bg-info">
+                                                                {{ subject.major.name }}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">{{ subject.lecture_hours || 0 }}</td>
+                                                    <td class="text-center">{{ subject.lab_hours || 0 }}</td>
+                                                    <td class="text-center">{{ (parseInt(subject.lecture_hours) || 0) + (parseInt(subject.lab_hours) || 0) }}</td>
+                                                    <td class="text-center"><strong>{{ subject.pivot?.units_override || subject.units }}</strong></td>
+                                                    <td class="text-center">{{ subject.prerequisites || '' }}</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot class="table-secondary">
+                                                <tr>
+                                                    <td colspan="2" class="text-center"><strong>TOTAL</strong></td>
+                                                    <td class="text-center"><strong>{{ getSemesterTotals(year, 2).lecture_hours }}</strong></td>
+                                                    <td class="text-center"><strong>{{ getSemesterTotals(year, 2).lab_hours }}</strong></td>
+                                                    <td class="text-center"><strong>{{ getSemesterTotals(year, 2).total_hours }}</strong></td>
+                                                    <td class="text-center"><strong>{{ getSemesterTotals(year, 2).units }}</strong></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
                                     </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Grand Total Summary -->
+                            <div v-if="yearSemesterTotals.byYearSemester.length > 0" class="mt-4">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-dark">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="2" class="text-center">CURRICULUM SUMMARY</th>
+                                                <th class="text-center">Lec Hrs</th>
+                                                <th class="text-center">Lab Hrs</th>
+                                                <th class="text-center">Total</th>
+                                                <th class="text-center">Units</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="table-light">
+                                            <tr>
+                                                <td colspan="2" class="text-center"><strong>GRAND TOTAL</strong></td>
+                                                <td class="text-center"><strong>{{ yearSemesterTotals.grandTotal.lecture_hours }}</strong></td>
+                                                <td class="text-center"><strong>{{ yearSemesterTotals.grandTotal.lab_hours }}</strong></td>
+                                                <td class="text-center"><strong>{{ yearSemesterTotals.grandTotal.total_hours }}</strong></td>
+                                                <td class="text-center"><strong>{{ yearSemesterTotals.grandTotal.units }}</strong></td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -239,6 +328,7 @@
                                             <th>Year Level</th>
                                             <th>Semester</th>
                                             <th>Required</th>
+                                            <th>Major</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -255,6 +345,10 @@
                                                 <span v-else class="badge bg-secondary">Elective</span>
                                             </td>
                                             <td>
+                                                <span v-if="subject.major" class="badge bg-info">{{ subject.major.name }}</span>
+                                                <span v-else class="text-muted">General</span>
+                                            </td>
+                                            <td>
                                                 <div class="btn-group btn-group-sm">
                                                     <button @click="editSubject(subject)" class="btn btn-outline-primary">
                                                         <i class="fas fa-edit"></i>
@@ -266,7 +360,7 @@
                                             </td>
                                         </tr>
                                         <tr v-if="subjects.length === 0">
-                                            <td colspan="8" class="text-center text-muted">No subjects found</td>
+                                            <td colspan="9" class="text-center text-muted">No subjects found</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -344,13 +438,16 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label">Department <span class="text-danger">*</span></label>
-                                        <select v-model="subjectForm.department_id" class="form-select" required>
-                                            <option value="">Select Department</option>
-                                            <option v-for="department in departments" :key="department.id" :value="department.id">
-                                                {{ department.name }}
+                                        <label class="form-label">Major Specification</label>
+                                        <select v-model="subjectForm.major_id" class="form-select">
+                                            <option value="">All Majors (General Subject)</option>
+                                            <option v-for="major in majors" :key="major.id" :value="major.id">
+                                                {{ major.name }} ({{ major.code }})
                                             </option>
                                         </select>
+                                        <small class="form-text text-muted">
+                                            Select a specific major if this subject is only for that major, or leave as "All Majors" for general subjects
+                                        </small>
                                     </div>
                                 </div>
                             </div>
@@ -436,7 +533,7 @@ const getCurriculumId = () => {
 // Reactive data
 const curriculum = ref(null)
 const subjects = ref([])
-const departments = ref([])
+const majors = ref([])
 const activeTab = ref('overview')
 const loading = ref(false)
 const showAddSubjectModal = ref(false)
@@ -449,9 +546,8 @@ const subjectForm = ref({
     lecture_hours: 0,
     lab_hours: 0,
     type: '',
-    department_id: '',
     status: 'Active',
-    // Pivot table fields
+    major_id: '',
     year_level: '',
     semester: '',
     order: 1,
@@ -470,6 +566,86 @@ const totalUnits = computed(() => {
         const units = subject.pivot?.units_override || subject.units || 0
         return total + parseInt(units)
     }, 0)
+})
+
+const hasMajorSpecificSubjects = computed(() => {
+    return subjects.value.some(subject => subject.major)
+})
+
+const majorsInCurriculum = computed(() => {
+    const majors = subjects.value
+        .filter(subject => subject.major)
+        .map(subject => subject.major)
+        .filter((major, index, self) => 
+            index === self.findIndex(m => m.id === major.id)
+        )
+    return majors
+})
+
+const curriculumType = computed(() => {
+    if (hasMajorSpecificSubjects.value) {
+        if (majorsInCurriculum.value.length === 1) {
+            return `Major-Specific (${majorsInCurriculum.value[0].name})`
+        } else {
+            return `Multi-Major (${majorsInCurriculum.value.length} majors)`
+        }
+    }
+    return 'General Curriculum'
+})
+
+const yearSemesterTotals = computed(() => {
+    const totals = {}
+    let grandTotal = {
+        lecture_hours: 0,
+        lab_hours: 0,
+        total_hours: 0,
+        units: 0
+    }
+
+    subjects.value.forEach(subject => {
+        const year = parseInt(subject.pivot?.year_level)
+        const semester = parseInt(subject.pivot?.semester)
+        const units = subject.pivot?.units_override || subject.units || 0
+        const lectureHours = parseInt(subject.lecture_hours) || 0
+        const labHours = parseInt(subject.lab_hours) || 0
+        const totalHours = lectureHours + labHours
+
+        if (year && semester) {
+            const key = `${year}-${semester}`
+            if (!totals[key]) {
+                totals[key] = {
+                    year,
+                    semester,
+                    lecture_hours: 0,
+                    lab_hours: 0,
+                    total_hours: 0,
+                    units: 0
+                }
+            }
+
+            totals[key].lecture_hours += lectureHours
+            totals[key].lab_hours += labHours
+            totals[key].total_hours += totalHours
+            totals[key].units += parseInt(units)
+
+            // Add to grand total
+            grandTotal.lecture_hours += lectureHours
+            grandTotal.lab_hours += labHours
+            grandTotal.total_hours += totalHours
+            grandTotal.units += parseInt(units)
+        }
+    })
+
+    // Convert to array and sort by year then semester
+    const sortedTotals = Object.values(totals).sort((a, b) => {
+        if (a.year !== b.year) return a.year - b.year
+        return a.semester - b.semester
+    })
+
+    return {
+        byYearSemester: sortedTotals,
+        grandTotal
+    }
 })
 
 // Methods
@@ -498,13 +674,15 @@ const fetchSubjects = async () => {
     }
 }
 
-const fetchDepartments = async () => {
+const fetchMajors = async () => {
     try {
-        const response = await axios.get('/api/departments/options')
-        departments.value = Array.isArray(response.data) ? response.data : []
+        if (curriculum.value?.program_id) {
+            const response = await axios.get(`/api/programs/${curriculum.value.program_id}/majors`)
+            majors.value = Array.isArray(response.data.data) ? response.data.data : []
+        }
     } catch (error) {
-        console.error('Error fetching departments:', error)
-        departments.value = []
+        console.error('Error fetching majors:', error)
+        majors.value = []
     }
 }
 
@@ -512,6 +690,56 @@ const getSubjectsByYearSemester = (year, semester) => {
     return subjects.value.filter(subject => 
         parseInt(subject.pivot?.year_level) === year && parseInt(subject.pivot?.semester) === semester
     )
+}
+
+const getYearName = (year) => {
+    const yearNames = {
+        1: 'FIRST YEAR',
+        2: 'SECOND YEAR', 
+        3: 'THIRD YEAR',
+        4: 'FOURTH YEAR',
+        5: 'FIFTH YEAR'
+    }
+    return yearNames[year] || `YEAR ${year}`
+}
+
+const getSemesterTotals = (year, semester) => {
+    const semesterSubjects = getSubjectsByYearSemester(year, semester)
+    
+    return semesterSubjects.reduce((totals, subject) => {
+        const lectureHours = parseInt(subject.lecture_hours) || 0
+        const labHours = parseInt(subject.lab_hours) || 0
+        const units = parseInt(subject.pivot?.units_override || subject.units) || 0
+        
+        totals.lecture_hours += lectureHours
+        totals.lab_hours += labHours
+        totals.total_hours += lectureHours + labHours
+        totals.units += units
+        
+        return totals
+    }, {
+        lecture_hours: 0,
+        lab_hours: 0,
+        total_hours: 0,
+        units: 0
+    })
+}
+
+const getSubjectTypeBadgeClass = (type) => {
+    switch (type) {
+        case 'Core':
+            return 'bg-primary'
+        case 'Major':
+            return 'bg-success'
+        case 'Minor':
+            return 'bg-warning'
+        case 'Elective':
+            return 'bg-secondary'
+        case 'General Education':
+            return 'bg-info'
+        default:
+            return 'bg-light text-dark'
+    }
 }
 
 const getStatusBadgeClass = (status) => {
@@ -533,6 +761,30 @@ const formatDate = (dateString) => {
 }
 
 const addSubject = async () => {
+    // Frontend validation
+    const errors = []
+    
+    if (!subjectForm.value.code.trim()) {
+        errors.push('Subject Code is required')
+    }
+    if (!subjectForm.value.title.trim()) {
+        errors.push('Subject Title is required')
+    }
+    if (!subjectForm.value.type) {
+        errors.push('Subject Type is required')
+    }
+    if (!subjectForm.value.year_level) {
+        errors.push('Year Level is required')
+    }
+    if (!subjectForm.value.semester) {
+        errors.push('Semester is required')
+    }
+    
+    if (errors.length > 0) {
+        alert('Please fill in all required fields:\n' + errors.join('\n'))
+        return
+    }
+    
     try {
         loading.value = true
         const curriculumId = getCurriculumId()
@@ -546,7 +798,6 @@ const addSubject = async () => {
             lecture_hours: subjectForm.value.lecture_hours,
             lab_hours: subjectForm.value.lab_hours,
             type: subjectForm.value.type,
-            department_id: subjectForm.value.department_id,
             status: subjectForm.value.status
         }
         
@@ -556,6 +807,7 @@ const addSubject = async () => {
         // Then attach it to the curriculum with pivot data
         const pivotData = {
             subject_id: subjectId,
+            major_id: subjectForm.value.major_id || null,
             year_level: subjectForm.value.year_level,
             semester: subjectForm.value.semester,
             order: subjectForm.value.order,
@@ -612,8 +864,8 @@ const resetSubjectForm = () => {
         lecture_hours: 0,
         lab_hours: 0,
         type: '',
-        department_id: '',
         status: 'Active',
+        major_id: '',
         year_level: '',
         semester: '',
         order: 1,
@@ -627,10 +879,10 @@ const goBack = () => {
 }
 
 // Lifecycle
-onMounted(() => {
-    fetchCurriculum()
-    fetchSubjects()
-    fetchDepartments()
+onMounted(async () => {
+    await fetchCurriculum()
+    await fetchSubjects()
+    await fetchMajors()
 })
 </script>
 
