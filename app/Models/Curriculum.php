@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Curriculum extends Model
 {
@@ -15,5 +16,24 @@ class Curriculum extends Model
     public function program(): BelongsTo
     {
         return $this->belongsTo(Program::class);
+    }
+
+    /**
+     * Get the subjects associated with the curriculum.
+     */
+    public function subjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Subject::class, 'curriculum_subject')
+            ->withPivot([
+                'year_level',
+                'semester', 
+                'order',
+                'is_required',
+                'units_override'
+            ])
+            ->withTimestamps()
+            ->orderBy('year_level')
+            ->orderBy('semester')
+            ->orderBy('order');
     }
 }
