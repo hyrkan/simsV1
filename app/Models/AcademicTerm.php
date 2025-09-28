@@ -3,16 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AcademicTerm extends Model
 {
-    protected $fillable = [
-        'school_year',
-        'semester',
-        'start_date',
-        'end_date',
-        'status'
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'created_at' => 'datetime',
@@ -35,5 +30,13 @@ class AcademicTerm extends Model
     public function getFormattedNameAttribute()
     {
         return $this->school_year . ', ' . $this->semester;
+    }
+
+    /**
+     * Get the exams for the academic term.
+     */
+    public function exams(): HasMany
+    {
+        return $this->hasMany(Exam::class);
     }
 }

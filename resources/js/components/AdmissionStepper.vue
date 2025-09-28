@@ -43,33 +43,48 @@
           <i class="fas fa-graduation-cap me-2"></i>Program Selection
         </h3>
         <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Program Name <span class="text-danger">*</span></label>
-            <select v-model="formData.program_id" class="form-select" required>
-              <option value="">Select Program</option>
-              <option value="1">Bachelor of Science in Information Technology</option>
-              <option value="2">Bachelor of Science in Computer Science</option>
-              <option value="3">Bachelor of Elementary Education</option>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Student Status <span class="text-danger">*</span></label>
+            <select v-model="formData.student_status" class="form-select" required>
+              <option value="">Select Status</option>
+              <option value="new">New Student</option>
+              <option value="old">Old Student</option>
+              <option value="transferee">Transferee</option>
             </select>
           </div>
-          <div class="col-md-3 mb-3">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Program Name <span class="text-danger">*</span></label>
+            <select v-model="formData.program_id" class="form-select" required :disabled="isLoading">
+              <option value="">{{ isLoading ? 'Loading programs...' : 'Select Program' }}</option>
+              <option v-for="program in programs" :key="program.id" :value="program.id">
+                {{ program.name }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-2 mb-3">
             <label class="form-label">Year Level <span class="text-danger">*</span></label>
             <select v-model="formData.year_level" class="form-select" required>
               <option value="">Select Year</option>
-              <option value="1">1st Year</option>
-              <option value="2">2nd Year</option>
-              <option value="3">3rd Year</option>
-              <option value="4">4th Year</option>
+              <option v-for="yearLevel in availableYearLevels" :key="yearLevel.value" :value="yearLevel.value">
+                {{ yearLevel.label }}
+              </option>
             </select>
           </div>
-          <div class="col-md-3 mb-3">
-            <label class="form-label">Major</label>
-            <select v-model="formData.major" class="form-select">
-              <option value="">Select Major (Optional)</option>
-              <option value="web-development">Web Development</option>
-              <option value="mobile-development">Mobile Development</option>
-              <option value="data-science">Data Science</option>
+        </div>
+        
+        <div class="row">
+          <div v-if="programHasMajors" class="col-md-4 mb-3">
+            <label class="form-label">Major <span class="text-danger">*</span></label>
+            <select v-model="formData.major_id" class="form-select" :disabled="isLoading" required>
+              <option v-for="major in majors" :key="major.id" :value="major.id">
+                {{ major.name }}
+              </option>
             </select>
+          </div>
+          <div v-if="formData.student_status === 'new' || formData.student_status === 'transferee'" class="col-md-4 mb-3">
+            <label class="form-label">Exam Schedule <span class="text-danger">*</span></label>
+            <input v-model="formData.exam_schedule" type="datetime-local" class="form-control" required>
+            <small class="form-text text-muted">Select your preferred exam date and time</small>
           </div>
         </div>
       </div>
@@ -441,6 +456,10 @@ export default {
     return {
       currentStep: 0,
       isSubmitting: false,
+      isLoading: false,
+      programs: [],
+      majors: [],
+      academicTerms: [],
       steps: [
         { title: 'Program', icon: 'graduation-cap' },
         { title: 'Personal Info', icon: 'user' },
@@ -452,8 +471,11 @@ export default {
       formData: {
         // Program Selection
         program_id: '',
+        major_id: '',
         year_level: '',
-        major: '',
+        student_status: '',
+        academic_term_id: '',
+        exam_schedule: '',
         
         // Personal Information
         surname: '',
@@ -512,11 +534,13 @@ export default {
         guardian_city: '',
         guardian_province: '',
         
-        // Educational Background
+        // Contact Person Information
         contact_given_name: '',
         contact_middle_initial: '',
         contact_surname: '',
         contact_person_number: '',
+
+        // Basic Education Background
         elementary_school: '',
         elementary_year: '',
         junior_high_school: '',
@@ -530,6 +554,25 @@ export default {
   computed: {
     progressPercentage() {
       return ((this.currentStep + 1) / this.steps.length) * 100;
+    },
+    selectedProgram() {
+      return this.programs.find(program => program.id == this.formData.program_id);
+    },
+    programHasMajors() {
+      return this.selectedProgram && this.majors.length > 0;
+    },
+    availableYearLevels() {
+      // For new students, only show 1st Year
+      if (this.formData.student_status === 'new') {
+        return [{ value: '1st Year', label: '1st Year' }];
+      }
+      // For other statuses, show all year levels
+      return [
+        { value: '1st Year', label: '1st Year' },
+        { value: '2nd Year', label: '2nd Year' },
+        { value: '3rd Year', label: '3rd Year' },
+        { value: '4th Year', label: '4th Year' }
+      ];
     }
   },
   methods: {
@@ -600,6 +643,101 @@ export default {
       Object.keys(this.formData).forEach(key => {
         this.formData[key] = '';
       });
+    },
+    async fetchPrograms() {
+      try {
+        const response = await fetch('/api/admission/programs');
+        const data = await response.json();
+        console.log('Programs API Response:', data);
+        if (data.success) {
+          this.programs = data.data;
+          console.log('Programs stored:', this.programs);
+          // Log specific program with ID 4
+          const program4 = this.programs.find(p => p.id === 4);
+          console.log('Program ID 4:', program4);
+        } else {
+          console.error('Failed to fetch programs:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching programs:', error);
+      }
+    },
+    async fetchMajors() {
+      if (!this.formData.program_id) {
+        this.majors = [];
+        this.formData.major_id = '';
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/admission/majors?program_id=${this.formData.program_id}`);
+        const data = await response.json();
+        if (data.success) {
+          this.majors = data.data;
+          // Auto-select the first major if available
+          if (this.majors.length > 0 && !this.formData.major_id) {
+            this.formData.major_id = this.majors[0].id;
+          }
+        } else {
+          console.error('Failed to fetch majors:', data.message);
+          this.majors = [];
+        }
+      } catch (error) {
+        console.error('Error fetching majors:', error);
+        this.majors = [];
+      }
+    },
+    async fetchAcademicTerms() {
+      try {
+        const response = await fetch('/api/admission/academic-terms');
+        const data = await response.json();
+        if (data.success) {
+          this.academicTerms = data.data;
+          // Automatically set the active term as default
+          const activeTerm = this.academicTerms.find(term => term.status === 'active');
+          if (activeTerm && !this.formData.academic_term_id) {
+            this.formData.academic_term_id = activeTerm.id;
+          }
+        } else {
+          console.error('Failed to fetch academic terms:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching academic terms:', error);
+      }
+    },
+    onProgramChange() {
+      this.formData.major_id = ''; // Reset major when program changes
+      this.fetchMajors();
+    }
+  },
+  async mounted() {
+    this.isLoading = true;
+    try {
+      await Promise.all([
+        this.fetchPrograms(),
+        this.fetchAcademicTerms()
+      ]);
+    } catch (error) {
+      console.error('Error loading initial data:', error);
+    } finally {
+      this.isLoading = false;
+    }
+  },
+  watch: {
+    'formData.program_id': function(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.onProgramChange();
+      }
+    },
+    'formData.student_status': function(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        // Reset year level when student status changes
+        this.formData.year_level = '';
+        // If new student is selected, automatically set to 1st Year
+        if (newVal === 'new') {
+          this.formData.year_level = '1st Year';
+        }
+      }
     }
   }
 }
