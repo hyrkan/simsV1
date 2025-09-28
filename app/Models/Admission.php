@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class Admission extends Model
 {
@@ -112,5 +113,58 @@ class Admission extends Model
     public function scopeByProgram($query, $programId)
     {
         return $query->where('program_id', $programId);
+    }
+
+    /**
+     * Generate a unique control number for the admission.
+     * Format: YYYY-NNNN (e.g., 2025-0001)
+     */
+    public static function generateControlNumber(): string
+    {
+        $currentYear = date('Y');
+        $prefix = $currentYear . '-';
+        
+        // Use database transaction to ensure atomicity
+        return DB::transaction(function () use ($prefix, $currentYear) {
+            // Get the highest control number for the current year
+            $lastAdmission = self::where('control_number', 'LIKE', $prefix . '%')
+                ->orderBy('control_number', 'desc')
+                ->lockForUpdate()
+                ->first();
+            
+            if ($lastAdmission) {
+                // Extract the sequential number and increment it
+                $lastNumber = (int) substr($lastAdmission->control_number, -4);
+                $nextNumber = $lastNumber + 1;
+            } else {
+                // First admission of the year
+                $nextNumber = 1;
+            }
+            
+            // Format the control number with leading zeros
+            $controlNumber = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            
+            // Double-check uniqueness (in case of race conditions)
+            while (self::where('control_number', $controlNumber)->exists()) {
+                $nextNumber++;
+                $controlNumber = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            }
+            
+            return $controlNumber;
+        });
+    }
+
+    /**
+     * Boot method to auto-generate control number when creating admission.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($admission) {
+            if (empty($admission->control_number)) {
+                $admission->control_number = self::generateControlNumber();
+            }
+        });
     }
 }

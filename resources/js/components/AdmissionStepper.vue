@@ -83,8 +83,38 @@
           </div>
           <div v-if="formData.student_status === 'new' || formData.student_status === 'transferee'" class="col-md-4 mb-3">
             <label class="form-label">Exam Schedule <span class="text-danger">*</span></label>
-            <input v-model="formData.exam_schedule" type="datetime-local" class="form-control" required>
-            <small class="form-text text-muted">Select your preferred exam date and time</small>
+            <input type="hidden" v-model="formData.exam_id" required />
+            <div class="exam-schedule-selector">
+              <button 
+                type="button" 
+                class="btn btn-outline-primary w-100 text-start exam-select-btn"
+                data-bs-toggle="modal" 
+                data-bs-target="#examScheduleModal"
+                :disabled="isLoading || exams.length === 0"
+              >
+                <div v-if="selectedExamSchedule" class="selected-exam-display">
+                  <div class="selected-exam-date">
+                    <i class="fas fa-calendar me-2"></i>
+                    {{ formatSelectedExamDate(selectedExamSchedule.exam_date) }}
+                  </div>
+                  <div class="selected-exam-time">
+                    <i class="fas fa-clock me-2"></i>
+                    {{ formatSelectedExamTime(selectedExamSchedule.start_time, selectedExamSchedule.end_time) }}
+                  </div>
+                </div>
+                <div v-else class="placeholder-text">
+                  <i class="fas fa-calendar-plus me-2"></i>
+                  {{ exams.length === 0 ? 'No exam schedules available' : 'Click to select schedule' }}
+                </div>
+              </button>
+              <small v-if="exams.length === 0" class="form-text text-warning">
+                <i class="fas fa-exclamation-triangle me-1"></i>
+                No exam schedules available at the moment
+              </small>
+              <small v-else class="form-text text-muted">
+                Click the button above to browse and select your preferred exam schedule
+              </small>
+            </div>
           </div>
         </div>
       </div>
@@ -446,12 +476,24 @@
         </button>
       </div>
     </form>
+    
+    <!-- Exam Schedule Modal -->
+    <ExamScheduleModal 
+      :exams="exams"
+      :selectedExamId="formData.exam_id"
+      @exam-selected="onExamSelected"
+    />
   </div>
 </template>
 
 <script>
+import ExamScheduleModal from './ExamScheduleModal.vue';
+
 export default {
   name: 'AdmissionStepper',
+  components: {
+    ExamScheduleModal
+  },
   data() {
     return {
       currentStep: 0,
@@ -460,6 +502,7 @@ export default {
       programs: [],
       majors: [],
       academicTerms: [],
+      exams: [],
       steps: [
         { title: 'Program', icon: 'graduation-cap' },
         { title: 'Personal Info', icon: 'user' },
@@ -475,7 +518,7 @@ export default {
         year_level: '',
         student_status: '',
         academic_term_id: '',
-        exam_schedule: '',
+        exam_id: '',
         
         // Personal Information
         surname: '',
@@ -561,6 +604,9 @@ export default {
     programHasMajors() {
       return this.selectedProgram && this.majors.length > 0;
     },
+    selectedExamSchedule() {
+      return this.exams.find(exam => exam.id == this.formData.exam_id);
+    },
     availableYearLevels() {
       // For new students, only show 1st Year
       if (this.formData.student_status === 'new') {
@@ -613,27 +659,50 @@ export default {
       this.isSubmitting = true;
       
       try {
-        // Add timestamp
+        // Prepare submission data
         const submissionData = {
-          ...this.formData,
-          timestamp: new Date().toISOString(),
-          status: 'pending'
+          ...this.formData
         };
         
-        // Here you would typically send the data to your backend
-        console.log('Submission Data:', submissionData);
+        console.log('Submitting admission data:', submissionData);
         
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Get CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         
-        alert('Application submitted successfully! You will receive a confirmation email shortly.');
+        // Submit to API
+        const response = await fetch('/api/admission/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+          },
+          body: JSON.stringify(submissionData)
+        });
         
-        // Reset form or redirect
-        this.resetForm();
+        const result = await response.json();
+        
+        if (result.success) {
+           alert(`Application submitted successfully! Your control number is ${result.data.control_number}. Please keep this number for your records. You will receive a confirmation email shortly.`);
+           
+           // Reset form or redirect
+           this.resetForm();
+        } else {
+          // Handle validation errors
+          if (result.errors) {
+            let errorMessage = 'Please fix the following errors:\n';
+            Object.keys(result.errors).forEach(field => {
+              errorMessage += `- ${result.errors[field][0]}\n`;
+            });
+            alert(errorMessage);
+          } else {
+            alert(result.message || 'There was an error submitting your application. Please try again.');
+          }
+        }
         
       } catch (error) {
         console.error('Submission error:', error);
-        alert('There was an error submitting your application. Please try again.');
+        alert('There was an error submitting your application. Please check your internet connection and try again.');
       } finally {
         this.isSubmitting = false;
       }
@@ -705,9 +774,48 @@ export default {
         console.error('Error fetching academic terms:', error);
       }
     },
+    async fetchExams() {
+      try {
+        const response = await fetch('/api/admission/exams');
+        const data = await response.json();
+        if (data.success) {
+          this.exams = data.data;
+        } else {
+          console.error('Failed to fetch exams:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching exams:', error);
+      }
+    },
     onProgramChange() {
       this.formData.major_id = ''; // Reset major when program changes
       this.fetchMajors();
+    },
+    formatSelectedExamDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    },
+    formatSelectedExamTime(startTime, endTime) {
+      const formatTime = (timeString) => {
+        const [hours, minutes] = timeString.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours), parseInt(minutes));
+        return date.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
+      };
+      
+      return `${formatTime(startTime)} - ${formatTime(endTime)}`;
+    },
+    onExamSelected(exam) {
+      this.formData.exam_id = exam.id;
     }
   },
   async mounted() {
@@ -715,7 +823,8 @@ export default {
     try {
       await Promise.all([
         this.fetchPrograms(),
-        this.fetchAcademicTerms()
+        this.fetchAcademicTerms(),
+        this.fetchExams()
       ]);
     } catch (error) {
       console.error('Error loading initial data:', error);
