@@ -114,4 +114,6 @@ Route::prefix('admission')->group(function () {
     Route::get('/programs', [AdmissionController::class, 'getPrograms']);
     Route::get('/majors', [AdmissionController::class, 'getMajorsByProgram']);
     Route::get('/academic-terms', [AdmissionController::class, 'getAcademicTerms']);
+    Route::get('/exams', [AdmissionController::class, 'getExams']);
+    Route::post('/submit', [AdmissionController::class, 'store']);
 });

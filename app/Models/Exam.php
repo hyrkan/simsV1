@@ -22,8 +22,6 @@ class Exam extends Model
 
     protected $casts = [
         'exam_date' => 'datetime',
-        'start_time' => 'datetime:H:i',
-        'end_time' => 'datetime:H:i',
     ];
 
     /**

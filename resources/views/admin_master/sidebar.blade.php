@@ -43,11 +43,20 @@
               </li>
             </ul>
           </li>
-          <li class="pc-item">
-            <a href="../elements/icon-tabler.html" class="pc-link">
-              <span class="pc-micon"><i class="ti ti-plant-2"></i></span>
-              <span class="pc-mtext">Icons</span>
+          <li class="pc-item pc-hasmenu">
+            <a href="#!" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-clipboard-check"></i></span>
+              <span class="pc-mtext">Exam Management</span>
+              <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
             </a>
+            <ul class="pc-submenu">
+              <li class="pc-item">
+                <a class="pc-link" href="{{route('exams.index')}}">All Exams</a>
+              </li>
+              <li class="pc-item">
+                <a class="pc-link" href="{{route('exams.create')}}">Create Exam</a>
+              </li>
+            </ul>
           </li>
   
           <li class="pc-item pc-caption">

@@ -8,6 +8,7 @@ use App\Http\Controllers\AcademicTermController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\CurriculumController;
+use App\Http\Controllers\ExamController;
 Route::get('/auth/login', [AuthController::class, 'showLoginForm'])->name('login');
 
 //student side
@@ -52,6 +53,7 @@ Route::get('/admin/programs-restore', [ProgramController::class, 'restoreProgram
 Route::get('/admin/program/{program}', [ProgramController::class, 'showProgram'])->name('admin.program.show')->middleware('auth');
 
 Route::resource('/admin/curricula', CurriculumController::class)->middleware('auth');
+Route::resource('/admin/exams', ExamController::class)->middleware('auth');
 
 
 
@@ -68,6 +70,9 @@ Route::prefix('admin/api')->group(function() {
     Route::get('/permissions', [RolesAndPermissionController::class, 'getPermissions']);
     Route::post('/permissions', [RolesAndPermissionController::class, 'createPermission']);
     Route::delete('/permissions/{id}', [RolesAndPermissionController::class, 'deletePermission']);
+    
+    // Exams API
+    Route::get('/exams', [ExamController::class, 'getData']);
 });
 
 
