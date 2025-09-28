@@ -10,9 +10,27 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\CurriculumController;
 Route::get('/auth/login', [AuthController::class, 'showLoginForm'])->name('login');
 
+//student side
 Route::get('/', function () {
     return view('landing'); 
 });
+
+Route::get('/admission', function () {
+    return view('admission');
+})->name('admission');
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Route::get('/admin', function () {
     return view('admin_master.layout');
@@ -34,6 +52,8 @@ Route::get('/admin/programs-restore', [ProgramController::class, 'restoreProgram
 Route::get('/admin/program/{program}', [ProgramController::class, 'showProgram'])->name('admin.program.show')->middleware('auth');
 
 Route::resource('/admin/curricula', CurriculumController::class)->middleware('auth');
+
+
 
 // API Routes for Roles and Permissions
 Route::prefix('admin/api')->group(function() {
