@@ -110,7 +110,7 @@
           <h1>Shaping Minds for Tomorrow's World</h1>
           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin quis magna vel dolor mattis hendrerit. Vestibulum sodales dignissim ipsum id commodo.</p>
           <div class="cta-buttons">
-            <a href="#" class="btn-apply">Apply Now</a>
+            <a href="{{ route('admission') }}" class="btn-apply">Apply Now</a>
             <a href="#" class="btn-tour">Campus Tour</a>
           </div>
           <div class="announcement">
